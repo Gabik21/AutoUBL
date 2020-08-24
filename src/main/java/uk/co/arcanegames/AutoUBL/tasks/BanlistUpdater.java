@@ -88,24 +88,15 @@ public class BanlistUpdater implements Runnable {
 
         try {
             char[] buffer = new char[bufferSize];
+            int bytesRead;
             StringBuilder sb = new StringBuilder();
 
             // Loop until interrupted or end of stream
-            while (true) {
-                // Attempt to read up to the buffer size
-                int bytesRead = in.read(buffer);
-
-                // End of stream has been reached, return the raw data
-                if (bytesRead == -1) {
-                    return sb.toString();
-                }
-
+            while ((bytesRead = in.read(buffer)) > 0) {
                 // Append what was read to the raw data string
                 sb.append(buffer, 0, bytesRead);
-
-                // Wait one server tick
-                Thread.sleep(50);
             }
+            return sb.toString();
         } finally {
             // Whatever happens, make sure the thread doesn't get interrupted!
             timer.cancel();
@@ -129,56 +120,11 @@ public class BanlistUpdater implements Runnable {
         try {
             url = new URL(banlistURL);
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-            conn.setInstanceFollowRedirects(false);
             conn.setConnectTimeout(timeout * 1000);
             conn.setReadTimeout(timeout * 1000);
             conn.addRequestProperty("Accept-Language", "en-US,en;q=0.8");
             conn.addRequestProperty("User-Agent", "Mozilla");
             conn.addRequestProperty("Referer", "google.com");
-            boolean found = false;
-            int tries = 0;
-            StringBuilder cookies = new StringBuilder();
-            while (!found) {
-                int status = conn.getResponseCode();
-                if (status == HttpURLConnection.HTTP_MOVED_TEMP
-                        || status == HttpURLConnection.HTTP_MOVED_PERM
-                        || status == HttpURLConnection.HTTP_SEE_OTHER) {
-                    // get redirect url from "location" header field
-                    String newUrl = conn.getHeaderField("Location");
-
-                    // get the cookie if need, for login
-                    String headerName;
-                    for (int i = 1; (headerName = conn.getHeaderFieldKey(i)) != null; i++) {
-                        if (headerName.equals("Set-Cookie")) {
-                            String newCookie = conn.getHeaderField(i);
-                            newCookie = newCookie.substring(0, newCookie.indexOf(";"));
-                            String cookieName = newCookie.substring(0, newCookie.indexOf("="));
-                            String cookieValue = newCookie.substring(newCookie.indexOf("=") + 1, newCookie.length());
-                            if (cookies.length() != 0) {
-                                cookies.append("; ");
-                            }
-                            cookies.append(cookieName).append("=").append(cookieValue);
-                        }
-                    }
-
-                    // open the new connnection again
-                    conn = (HttpURLConnection) new URL(newUrl).openConnection();
-                    conn.setInstanceFollowRedirects(false);
-                    conn.setRequestProperty("Cookie", cookies.toString());
-                    conn.setConnectTimeout(timeout * 1000);
-                    conn.setReadTimeout(timeout * 1000);
-                    conn.addRequestProperty("Accept-Language", "en-US,en;q=0.8");
-                    conn.addRequestProperty("User-Agent", "Mozilla");
-                    conn.addRequestProperty("Referer", "google.com");
-                } else if (status == HttpURLConnection.HTTP_OK) {
-                    found = true;
-                } else {
-                    tries++;
-                    if (tries >= retries) {
-                        throw new IOException("Failed to reach " + url.getHost() + " after " + retries + " attempts");
-                    }
-                }
-            }
 
             in = new BufferedReader(new InputStreamReader(conn.getInputStream()), bufferSize);
 

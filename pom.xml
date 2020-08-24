@@ -4,27 +4,26 @@
 
     <groupId>uk.co.arcanegames</groupId>
     <artifactId>AutoUBL</artifactId>
-    <version>0.2.1</version>
+    <version>0.3</version>
     <packaging>jar</packaging>
 
     <name>AutoUBL</name>
     <url>http://maven.apache.org</url>
 
     <repositories>
-        <!-- Bukkit can be found at the following repository -->
         <repository>
-            <id>bukkit-repo</id>
-            <url>http://repo.bukkit.org/content/groups/public/</url>
+            <id>spigot-repo</id>
+            <url>https://hub.spigotmc.org/nexus/content/repositories/sonatype-nexus-snapshots/</url>
         </repository>
     </repositories>
   
     <dependencies>
         <!-- Dependency information --> 
         <dependency>
-            <groupId>org.bukkit</groupId>
-            <artifactId>bukkit</artifactId>
+            <groupId>org.spigotmc</groupId>
+            <artifactId>spigot-api</artifactId>
             <!-- Bukkit API Version, change if necessary -->
-            <version>1.7.9-R0.2-SNAPSHOT</version>
+            <version>1.8.8-R0.1-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>junit</groupId>
